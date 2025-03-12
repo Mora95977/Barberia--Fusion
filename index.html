@@ -48,12 +48,12 @@
     </style>
 </head>
 <body>
-    <img src="logo.png" alt="Logo Barbería" class="logo">
+    <img src="logo.jpg" alt="Logo Barbería" class="logo">
     <h1 style="color: #007bff;">Salón de Belleza y Barbería Fusión</h1>
     <h2>Reserva tu cita</h2>
     
     <div class="container">
-        <img src="https://www.google.com/url?sa=i&url=https%3A%2F%2Far.pinterest.com%2Fferchofdg%2Fbarber%25C3%25ADa%2F&psig=AOvVaw0Qawl8NVv6gHJHuGP6VG2S&ust=1741832666558000&source=images&cd=vfe&opi=89978449&ved=0CBQQjRxqFwoTCMC5tcC-g4wDFQAAAAAdAAAAABAR" alt="Imagen de Barbería" class="service-image">
+        <img src="2..jpg" alt="Imagen de Barbería" class="service-image">
         
         <label for="nombre">Nombre:</label>
         <input type="text" id="nombre" placeholder="Tu nombre">
@@ -74,12 +74,11 @@
             <option value="Pablo Barbershop">Pablo Barbershop</option>
             <option value="Axel Barbershop">Axel Barbershop</option>
             <option value="Joel Barbershop">Joel Barbershop</option>
-            <option value="Yendry Estilista,manicurista,lashista">Yendry Estilista,manicurista,lashista</option>
-    
+            <option value="Yendry">Yendry</option>
         </select>
         
         <label for="fecha">Fecha:</label>
-        <input type="date" id="fecha">
+        <input type="date" id="fecha" onchange="cargarHorasDisponibles()">
         
         <label for="hora">Hora:</label>
         <input type="time" id="hora">
@@ -90,6 +89,16 @@
     </div>
 
     <script>
+        function cargarHorasDisponibles() {
+            let fecha = document.getElementById("fecha").value;
+            let barbero = document.getElementById("barbero").value;
+            let horaInput = document.getElementById("hora");
+            let citas = JSON.parse(localStorage.getItem("citas")) || {};
+            if (!citas[barbero]) citas[barbero] = [];
+            horaInput.disabled = false;
+            horaInput.value = "";
+        }
+
         function reservarCita() {
             let nombre = document.getElementById("nombre").value;
             let servicio = document.getElementById("servicio").value;
@@ -98,10 +107,22 @@
             let hora = document.getElementById("hora").value;
             let telefonoWhatsApp = "+50684021824"; // Reemplazar con el número de WhatsApp de la barbería
 
+            let citas = JSON.parse(localStorage.getItem("citas")) || {};
+            if (!citas[barbero]) citas[barbero] = [];
+            let citaExistente = citas[barbero].find(c => c.fecha === fecha && c.hora === hora);
+
+            if (citaExistente) {
+                alert("Esa hora ya está reservada con este barbero. Por favor, elige otra.");
+                return;
+            }
+
             if (nombre && servicio && barbero && fecha && hora) {
+                citas[barbero].push({ fecha, hora });
+                localStorage.setItem("citas", JSON.stringify(citas));
                 let mensaje = `Hola, soy ${nombre}. Me gustaría agendar una cita para ${servicio} con ${barbero} el ${fecha} a las ${hora}. Por favor, llegaré 10 minutos antes.`;
                 let url = `https://wa.me/${telefonoWhatsApp}?text=${encodeURIComponent(mensaje)}`;
                 window.open(url, "_blank");
+                alert("Cita reservada con éxito. Si deseas cancelar, contacta a la barbería.");
             } else {
                 alert("Por favor, completa todos los campos");
             }
@@ -109,3 +130,4 @@
     </script>
 </body>
 </html>
+
